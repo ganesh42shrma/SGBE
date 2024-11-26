@@ -16,8 +16,24 @@ connectDB();
 
 const app = express();
 
-// Use CORS middleware
-app.use(cors());
+const corsOptions = {
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      "https://stkgaurd.netlify.app",
+      "http://localhost:3000",
+    ];
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+};
+
+// Use the CORS middleware with the custom options
+app.use(cors(corsOptions));
 
 // Set a higher limit for JSON payloads
 app.use(express.json({ limit: "50mb" }));
@@ -34,12 +50,9 @@ app.use("/api/roles", roleRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
 
-// Serve static files in production
 if (process.env.NODE_ENV === "production") {
-  // Serve static files from the React app
   app.use(express.static(path.join(__dirname, "client/build")));
 
-  // Handle React routing, return all requests to the React app
   app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
   });
