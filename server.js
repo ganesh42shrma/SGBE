@@ -9,18 +9,22 @@ const userRoutes = require("./routes/userRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const { initializeRoles } = require("./models/predefinedRoles");
 const { hashPassword } = require("./getpassword");
-const path = require("path");
 
+// Load environment variables
 dotenv.config();
+
+// Connect to the database
 connectDB();
 
+// Create an Express app
 const app = express();
 
+// CORS options
 const corsOptions = {
   origin: (origin, callback) => {
     const allowedOrigins = [
-      "https://stkgaurd.netlify.app",
-      "http://localhost:3000",
+      "https://stkgaurd.netlify.app", // Replace with your frontend URL if needed
+      "http://localhost:3000",       // Allow localhost during development
     ];
     if (allowedOrigins.includes(origin) || !origin) {
       callback(null, true);
@@ -28,14 +32,14 @@ const corsOptions = {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
-  allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-// Use the CORS middleware with the custom options
+// Use CORS middleware
 app.use(cors(corsOptions));
 
-// Set a higher limit for JSON payloads
+// Parse incoming requests with JSON payloads
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
@@ -50,12 +54,10 @@ app.use("/api/roles", roleRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
 
-// if (process.env.NODE_ENV === "production") {
-//   app.use(express.static(path.join(__dirname, "client/build")));
-
-//   app.get("*", (req, res) => {
-//     res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
-//   });
-// }
+// Start the server
+const PORT = process.env.PORT || 5000; // Use Render's dynamic port or default to 5000 for local dev
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
 module.exports = app;
